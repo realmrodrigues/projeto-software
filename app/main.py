@@ -61,7 +61,15 @@ async def listar_ordens(request: Request, db: Session = Depends(get_db)):
     if not usuario_id:
         return RedirectResponse(url="/", status_code=status.HTTP_303_SEE_OTHER)
     
-    ordens = db.query(OrdemServico).order_by(OrdemServico.data_ultima_atualizacao.desc()).all()
+    busca = request.query_params.get("q", "").strip()
+    query = db.query(OrdemServico)
+    if busca:
+        query = query.filter(
+            (OrdemServico.numero_os.contains(busca)) |
+            (OrdemServico.identificador_aparelho.contains(busca)) |
+            (OrdemServico.nome_cliente.contains(busca))
+        )
+    ordens = query.order_by(OrdemServico.data_ultima_atualizacao.desc()).all()
     return templates.TemplateResponse(
         "lista_ordens.html",
         {
