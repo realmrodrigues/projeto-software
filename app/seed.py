@@ -35,7 +35,7 @@ db.add(atendente)
 db.commit()
 db.refresh(tecnico)
 
-# Cria ordens de serviço
+# Cria ordens de serviço de demonstração
 ordens = [
     OrdemServico(
         numero_os="2026-0187",
@@ -64,6 +64,15 @@ ordens = [
         data_ultima_atualizacao=datetime.utcnow() - timedelta(hours=1),
         usuario_id=tecnico.id
     ),
+    OrdemServico(
+        numero_os="2026-0195",
+        nome_cliente="Fernanda Costa",
+        identificador_aparelho="358765432109876",
+        status_atual="Em diagnóstico",
+        data_entrada=datetime.utcnow() - timedelta(hours=5),
+        data_ultima_atualizacao=datetime.utcnow() - timedelta(hours=4),
+        usuario_id=tecnico.id
+    ),
 ]
 
 for ordem in ordens:
@@ -74,4 +83,5 @@ print("Banco populado com sucesso!")
 print("Usuários criados:")
 print("  - jorge.tecnico / teste123 (técnico)")
 print("  - maria.atendente / teste123 (atendente)")
+print(f"Ordens criadas: {len(ordens)}")
 db.close()
