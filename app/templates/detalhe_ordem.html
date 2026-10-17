@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ordem {{ ordem.numero_os }} - Torotech Status</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f5f7fa; color: #1f2937; }
+        header {
+            background: #1a2b4a;
+            color: white;
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        header a { color: white; text-decoration: none; font-size: 0.9rem; }
+        .container { max-width: 640px; margin: 2rem auto; padding: 0 1rem; }
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.8rem;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            margin-bottom: 1.5rem;
+        }
+        .card h2 { font-size: 1.5rem; color: #1a2b4a; margin-bottom: 1rem; }
+        .info { margin-bottom: 0.6rem; font-size: 0.95rem; }
+        .info strong { color: #374151; }
+        .badge {
+            display: inline-block;
+            padding: 0.35rem 0.85rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-top: 0.5rem;
+        }
+        .badge-diagnostico { background: #f3f4f6; color: #374151; }
+        .badge-peca { background: #fef3c7; color: #92400e; }
+        .badge-reparo { background: #ffedd5; color: #9a3412; }
+        .badge-pronto { background: #d1fae5; color: #065f46; }
+        h3 { font-size: 1.1rem; margin-bottom: 1rem; color: #1a2b4a; }
+        .status-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+        .status-btn {
+            padding: 1rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            background: white;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            text-align: center;
+            min-height: 56px;
+            transition: all 0.15s;
+        }
+        .status-btn:hover { border-color: #1e40af; }
+        .status-btn.selected {
+            border-color: #1e40af;
+            background: #eff6ff;
+            color: #1e40af;
+        }
+        .btn-salvar {
+            width: 100%;
+            padding: 0.95rem;
+            background: #1e40af;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.05rem;
+            font-weight: 600;
+            cursor: pointer;
+            min-height: 50px;
+        }
+        .btn-salvar:hover { background: #1e3a8a; }
+        .voltar { display: inline-block; margin-bottom: 1rem; color: #1e40af; text-decoration: none; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+    <header>
+        <strong>Torotech Status</strong>
+        <div>
+            {{ usuario_nome }} ({{ usuario_tipo }}) &nbsp;|&nbsp;
+            <a href="/logout">Sair</a>
+        </div>
+    </header>
+
+    <div class="container">
+        <a class="voltar" href="/ordens">← Voltar para listagem</a>
+
+        <div class="card">
+            <h2>{{ ordem.numero_os }}</h2>
+            <div class="info"><strong>Cliente:</strong> {{ ordem.nome_cliente }}</div>
+            <div class="info"><strong>IMEI / Identificador:</strong> {{ ordem.identificador_aparelho }}</div>
+            <div class="info"><strong>Última atualização:</strong> {{ ordem.data_ultima_atualizacao.strftime("%d/%m/%Y %H:%M") }}</div>
+            
+            <div style="margin-top:1rem;">
+                <strong>Status atual:</strong><br>
+                {% if ordem.status_atual == "Em diagnóstico" %}
+                    <span class="badge badge-diagnostico">{{ ordem.status_atual }}</span>
+                {% elif ordem.status_atual == "Aguardando peça" %}
+                    <span class="badge badge-peca">{{ ordem.status_atual }}</span>
+                {% elif ordem.status_atual == "Em reparo" %}
+                    <span class="badge badge-reparo">{{ ordem.status_atual }}</span>
+                {% else %}
+                    <span class="badge badge-pronto">{{ ordem.status_atual }}</span>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if usuario_tipo == "tecnico" %}
+        <div class="card">
+            <h3>Alterar Status</h3>
+            <form method="post" action="/ordens/{{ ordem.numero_os }}/status" id="formStatus">
+                <div class="status-grid">
+                    {% for status in status_permitidos %}
+                    <label class="status-btn {% if status == ordem.status_atual %}selected{% endif %}">
+                        <input type="radio" name="novo_status" value="{{ status }}" 
+                               {% if status == ordem.status_atual %}checked{% endif %}
+                               style="display:none;"
+                               onchange="document.querySelectorAll('.status-btn').forEach(b => b.classList.remove('selected')); this.parentElement.classList.add('selected');">
+                        {{ status }}
+                    </label>
+                    {% endfor %}
+                </div>
+                <button type="submit" class="btn-salvar">Salvar status</button>
+            </form>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>
